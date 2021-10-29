@@ -8,6 +8,7 @@ Project Type: Traveling and Tourism
 // dependencies
 const express = require('express');
 const { MongoClient } = require('mongodb');
+const ObjectId = require('mongodb').ObjectId;
 const app = express();
 const cors = require('cors');
 const port = process.env.PORT || 5000;
@@ -27,7 +28,66 @@ const client = new MongoClient(uri, {
 async function run() {
 	try {
 		await client.connect();
-		console.log('database connected');
+
+		// defining database and collections
+		const database = client.db('exploreDream');
+		const tourCollection = database.collection('tours');
+		const bookingCollection = database.collection('bookings');
+
+		// making api to send and receive data
+
+		// GET api to send tours
+		app.get('/tours', async (req, res) => {
+			const cursor = tourCollection.find({});
+			const tours = await cursor.toArray();
+
+			res.send(tours);
+		});
+
+		// GET api to send single tour
+		app.get('/tourdetail/:id', async (req, res) => {
+			const id = req.params.id;
+
+			const query = { _id: ObjectId(id) };
+			const tour = await tourCollection.findOne(query);
+			res.send(tour);
+		});
+
+		// GET api to send orders by uid
+		app.get('/bookings/:user_id', async (req, res) => {
+			const user_id = req.params.user_id;
+
+			const query = { user_id: user_id };
+			const cursor = bookingCollection.find(query);
+			const bookings = await cursor.toArray();
+			res.send(bookings);
+		});
+
+		// POST api to store tour
+		app.post('/addtour', async (req, res) => {
+			const tour = req.body;
+
+			const result = await tourCollection.insertOne(tour);
+			res.json(result);
+		});
+
+		// POST api to store booking
+		app.post('/addbooking', async (req, res) => {
+			const order = req.body;
+
+			const result = await bookingCollection.insertOne(order);
+			res.json(result);
+		});
+
+		// DELETE api to cancel booking
+		app.delete('/cancelbooking/:bookingid', async (req, res) => {
+			const bookingId = req.params.bookingid;
+			console.log(bookingId);
+			const query = { _id: ObjectId(bookingId) };
+
+			const result = await bookingCollection.deleteOne(query);
+			res.send(result);
+		});
 	} finally {
 		// await client.close();
 	}
