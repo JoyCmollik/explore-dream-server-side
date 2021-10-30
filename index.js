@@ -53,13 +53,22 @@ async function run() {
 			res.send(tour);
 		});
 
-		// GET api to send orders by uid
+		// GET api to send bookings by uid
 		app.get('/bookings/:user_id', async (req, res) => {
 			const user_id = req.params.user_id;
 
 			const query = { user_id: user_id };
 			const cursor = bookingCollection.find(query);
 			const bookings = await cursor.toArray();
+			res.send(bookings);
+		});
+
+		// GET api to send all the bookings
+		app.get('/allbookings', async (req, res) => {
+			const cursor = bookingCollection.find({});
+
+			const bookings = await cursor.toArray();
+
 			res.send(bookings);
 		});
 
@@ -77,6 +86,23 @@ async function run() {
 
 			const result = await bookingCollection.insertOne(order);
 			res.json(result);
+		});
+
+		// PUT api to update booking
+		app.put('/updatebooking/:_id', async (req, res) => {
+			const _id = req.params._id;
+			const updatedData = req.body;
+
+			const filter = { _id: ObjectId(_id) };
+			const updateBooking = {
+				$set: updatedData,
+			};
+
+			const result = await bookingCollection.updateOne(
+				filter,
+				updateBooking
+			);
+			res.send(result);
 		});
 
 		// DELETE api to cancel booking
