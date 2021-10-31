@@ -9,9 +9,9 @@ Project Type: Traveling and Tourism
 const express = require('express');
 const { MongoClient } = require('mongodb');
 const ObjectId = require('mongodb').ObjectId;
+const port = process.env.PORT || 5000;
 const app = express();
 const cors = require('cors');
-const port = process.env.PORT || 5000;
 require('dotenv').config();
 
 // middleware
@@ -24,8 +24,6 @@ const client = new MongoClient(uri, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 });
-
-console.log(uri);
 
 async function run() {
 	try {
